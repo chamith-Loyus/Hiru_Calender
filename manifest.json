@@ -1,0 +1,23 @@
+{
+  "name": "Hiru TV Calendar 2026",
+  "short_name": "Hiru Calendar",
+  "description": "Premium 2026 Calendar with Sri Lankan Holidays by Hiru TV.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#D78F26",
+  "icons": [
+    {
+      "src": "icons/logo.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/logo.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
