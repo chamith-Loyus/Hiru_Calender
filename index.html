@@ -4,12 +4,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Hiru TV Calendar 2026 - PWA</title>
+  <title>Hiru Calendar 2026</title>
 
-  <!-- PWA Manifest -->
+  <!-- PWA Manifest & iOS -->
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#D78F26">
   <link rel="apple-touch-icon" href="icons/logo.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Hiru Calendar 2026">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -303,6 +306,51 @@
       }
     }
 
+    /* Install Banner */
+    .install-banner {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      background: #fff;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      z-index: 9999;
+      animation: slideUp 0.5s ease-out;
+      border: 2px solid var(--hiru-orange);
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .install-banner .btn-install {
+      background: var(--hiru-orange);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 8px 20px;
+      font-weight: 700;
+      margin-left: 10px;
+    }
+
+    .install-banner .close-btn {
+      float: right;
+      cursor: pointer;
+      font-weight: 900;
+      color: #ccc;
+    }
+
     /* PDF Mode adjustments */
     .pdf-mode #controlsBar {
       display: none !important;
@@ -330,12 +378,23 @@
     </div>
   </div>
 
+  <div class="install-banner" id="installBanner">
+    <span class="close-btn" id="closeInstall">&times;</span>
+    <div class="d-flex align-items-center">
+      <img src="icons/logo.png" width="40" height="40" class="me-2" style="border-radius:8px">
+      <div class="flex-grow-1">
+        <div style="font-weight:700; font-size:14px">Install Hiru Calendar 2026</div>
+        <div style="font-size:12px; color:#666" id="installMessage">Access 2026 holidays offline anytime.</div>
+      </div>
+      <button class="btn-install" id="installBtn">Install</button>
+    </div>
+  </div>
+
   <div class="calendar-shell">
     <div class="calendar-card" id="captureArea">
       <div class="cal-header">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
           <div class="logo-container">
-            <img class="logo-app" src="icons/logo.png" alt="App Logo" onerror="this.style.display='none'">
             <img class="logo-hiru" src="https://www.hirutv.lk/assets/images/logo.png" alt="Hiru TV">
           </div>
           <div class="text-end">
@@ -536,6 +595,45 @@
       currentMonth = 0;
       renderMonth(2026, 0);
       pdf.save("Hiru_TV_Calendar_2026.pdf");
+    });
+
+    // Install Prompt Logic
+    let deferredPrompt;
+    const installBanner = document.getElementById('installBanner');
+    const installBtn = document.getElementById('installBtn');
+    const installMsg = document.getElementById('installMessage');
+
+    // Detect if running as standalone/PWA
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+    if (!isStandalone) {
+      // Chrome / Android
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBanner.style.display = 'block';
+      });
+
+      // iOS Detection
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      if (isIOS) {
+        installBanner.style.display = 'block';
+        installBtn.style.display = 'none'; // Hide button because iOS needs manual share
+        installMsg.innerHTML = 'Tap the Share button then scroll down and select <b>"Add to Home Screen"</b>.';
+      }
+    }
+
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') installBanner.style.display = 'none';
+        deferredPrompt = null;
+      }
+    });
+
+    document.getElementById('closeInstall').addEventListener('click', () => {
+      installBanner.style.display = 'none';
     });
 
     renderMonth(2026, 0);

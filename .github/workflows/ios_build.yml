@@ -1,0 +1,36 @@
+name: Build iOS Wrapper
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          
+      - name: Install dependencies
+        run: |
+          cd ios_wrapper
+          flutter pub get
+          
+      - name: Build iOS (No Codesign)
+        run: |
+          cd ios_wrapper
+          flutter build ios --no-codesign
+          
+      - name: Compress Build
+        run: |
+          cd ios_wrapper/build/ios/iphoneos
+          zip -r HiruCalendar_iOS.zip Runner.app
+          
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hiru-calendar-ios-build
+          path: ios_wrapper/build/ios/iphoneos/HiruCalendar_iOS.zip
