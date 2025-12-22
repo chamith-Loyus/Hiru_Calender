@@ -50,8 +50,8 @@ dev_dependencies:
 
 flutter_launcher_icons:
   ios: true
+  image_path_ios: "assets/app_icon_no_alpha.png"
   image_path: "assets/app_icon.png"
-  background_color: "#ffffff"
   remove_alpha_ios: true
 
 # For information on the generic Dart part of this file, see the
