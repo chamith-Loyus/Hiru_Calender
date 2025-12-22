@@ -26,11 +26,11 @@ jobs:
           
       - name: Compress Build
         run: |
-          cd ios_wrapper/build/ios/simulator
+          cd ios_wrapper/build/ios/iphonesimulator
           zip -r HiruCalendar_Simulator.zip Runner.app
           
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: hiru-calendar-simulator-build
-          path: ios_wrapper/build/ios/simulator/HiruCalendar_Simulator.zip
+          path: ios_wrapper/build/ios/iphonesimulator/HiruCalendar_Simulator.zip
