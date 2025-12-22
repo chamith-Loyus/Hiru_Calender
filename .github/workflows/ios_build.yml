@@ -19,18 +19,18 @@ jobs:
           cd ios_wrapper
           flutter pub get
           
-      - name: Build iOS (No Codesign)
+      - name: Build iOS (Simulator)
         run: |
           cd ios_wrapper
-          flutter build ios --no-codesign
+          flutter build ios --simulator --no-codesign
           
       - name: Compress Build
         run: |
-          cd ios_wrapper/build/ios/iphoneos
-          zip -r HiruCalendar_iOS.zip Runner.app
+          cd ios_wrapper/build/ios/simulator
+          zip -r HiruCalendar_Simulator.zip Runner.app
           
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: hiru-calendar-ios-build
-          path: ios_wrapper/build/ios/iphoneos/HiruCalendar_iOS.zip
+          name: hiru-calendar-simulator-build
+          path: ios_wrapper/build/ios/simulator/HiruCalendar_Simulator.zip
