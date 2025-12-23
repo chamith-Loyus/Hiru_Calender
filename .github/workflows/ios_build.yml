@@ -58,12 +58,13 @@ jobs:
           security import ios/certs/certificate.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "buildpass" build.keychain
           
-          # Build signed IPA with explicit signing flags
+          # Build signed IPA with explicit signing flags and verbose logging
           flutter build ipa --release \
             --export-options-plist=ios/ExportOptions.plist \
             --build-name=1.0.0 --build-number=1 \
             --code-sign-identity="Apple Distribution" \
-            --provisioning-profile-specifier="Hiru Calendar 2026 App Store"
+            --provisioning-profile-specifier="Hiru Calendar 2026 App Store" \
+            --verbose
 
           
       - name: Upload to TestFlight
