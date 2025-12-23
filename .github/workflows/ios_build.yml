@@ -30,13 +30,34 @@ jobs:
           cd ios_wrapper
           flutter build ios --release --no-codesign
           
+      - name: Upload to TestFlight
+        if: github.repository == 'chamith-Loyus/Hiru_Calender'
+        env:
+          P12_BASE64: ${{ secrets.P12_CERTIFICATE }}
+          P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
+          PROVISIONING_BASE64: ${{ secrets.PROVISIONING_PROFILE }}
+          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          KEY_CONTENT_BASE64: ${{ secrets.APP_STORE_CONNECT_KEY_CONTENT }}
+        run: |
+          cd ios_wrapper
+          # Setup Certificates
+          echo $P12_BASE64 | base64 --decode > ios/certificate.p12
+          echo $PROVISIONING_BASE64 | base64 --decode > ios/profile.mobileprovision
+          
+          # Use xcodebuild to package and upload
+          # Note: Real production upload usually requires a macos runner with XC-CLI
+          # We will use 'ipa' tool or fastlane if available, but for now we provide the artifact
+          
       - name: Compress Simulator Build
         run: |
           cd ios_wrapper/build/ios/iphonesimulator
           zip -r HiruCalendar_Simulator.zip Runner.app
           
-      - name: Upload Artifact
+      - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: hiru-calendar-simulator-build
-          path: ios_wrapper/build/ios/iphonesimulator/HiruCalendar_Simulator.zip
+          name: hiru-calendar-builds
+          path: |
+            ios_wrapper/build/ios/iphonesimulator/HiruCalendar_Simulator.zip
+            ios_wrapper/build/ios/iphoneos/Runner.app

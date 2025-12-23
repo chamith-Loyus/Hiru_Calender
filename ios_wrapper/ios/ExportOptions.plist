@@ -5,11 +5,11 @@
 	<key>method</key>
 	<string>app-store</string>
 	<key>teamID</key>
-	<string>REPLACE_WITH_YOUR_TEAM_ID</string>
+	<string>6LQK8G38G5</string>
 	<key>provisioningProfiles</key>
 	<dict>
 		<key>com.hiru.calendar</key>
-		<string>REPLACE_WITH_YOUR_PROFILE_NAME</string>
+		<string>Hiru Calendar 2026 App Store</string>
 	</dict>
 	<key>uploadSymbols</key>
 	<true/>
