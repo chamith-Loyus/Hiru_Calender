@@ -409,7 +409,8 @@
 
     .modal-header-img {
       height: 140px;
-      background: linear-gradient(135deg, var(--hiru-orange), var(--hiru-yellow));
+      /* Hiru Yellow/Orange Branding */
+      background: linear-gradient(135deg, #FFD700, #FF8C00);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -420,12 +421,32 @@
       position: absolute;
       bottom: -20px;
       background: #fff;
-      padding: 10px 25px;
-      border-radius: 15px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      padding: 8px 20px;
+      border-radius: 50px;
+      box-shadow: 0 4px 12px rgba(215, 143, 38, 0.3);
       font-weight: 900;
       color: var(--hiru-brown);
-      font-size: 1.2rem;
+      font-size: 1.1rem;
+      border: 2px solid var(--hiru-yellow);
+    }
+
+    .modal-close-btn {
+      background: var(--hiru-orange);
+      border: none;
+      padding: 14px 30px;
+      border-radius: 12px;
+      font-weight: 800;
+      color: #fff;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      font-size: 1rem;
+      box-shadow: 0 4px 15px rgba(215, 143, 38, 0.3);
+    }
+
+    .modal-close-btn:hover {
+      background: #c27d1d;
+      transform: translateY(-2px);
     }
 
     .modal-body {
@@ -449,23 +470,9 @@
       margin-bottom: 25px;
     }
 
-    .modal-close-btn {
-      background: #f0f0f0;
-      border: none;
-      padding: 12px 30px;
-      border-radius: 12px;
-      font-weight: 700;
-      color: #666;
-      cursor: pointer;
-      transition: all 0.2s;
-      width: 100%;
-      font-size: 1rem;
+
     }
 
-    .modal-close-btn:hover {
-      background: #e0e0e0;
-      color: #333;
-    }
 
     /* Interactive Cells */
     .day.interactive {
@@ -484,17 +491,24 @@
 
     /* Next Holiday Widget */
     .next-holiday-banner {
-      background: rgba(255, 255, 255, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.4);
-      border-radius: 16px;
-      padding: 15px 20px;
-      margin: 0 30px 20px;
-      /* Inside card spacing */
+      background: rgba(255, 255, 255, 0.85);
+      /* More opaque */
+      border: 1px solid rgba(254, 230, 4, 0.5);
+      /* Yellow border hint */
+      border-radius: 20px;
+      padding: 18px 24px;
+      margin: 10px 20px 25px;
+      /* Better spacing: Top Side Bottom */
       display: flex;
       align-items: center;
       gap: 15px;
-      backdrop-filter: blur(5px);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 8px 20px rgba(215, 143, 38, 0.1);
+      transition: transform 0.2s ease;
+    }
+
+    .next-holiday-banner:hover {
+      transform: translateY(-2px);
     }
 
     .nh-icon {
@@ -789,23 +803,38 @@
     const closeModalBtn = document.getElementById('closeModalBtn');
 
     function getHolidayMessage(name, type) {
-      const lowerName = name.toLowerCase();
+      const n = name.toLowerCase();
 
-      // Specific Messages
-      if (lowerName.includes('independent')) return "Celebrating the freedom, pride, and sovereignty of our motherland. Happy Independence Day!";
-      if (lowerName.includes('new year')) return "Wishing you a prosperous, happy, and peaceful Sinhala & Tamil New Year!";
-      if (lowerName.includes('christmas')) return "Wishing you peace, joy, and love this Christmas season!";
-      if (lowerName.includes('vesak')) return "May the light of Vesak guide you towards peace and happiness.";
-      if (lowerName.includes('poson')) return "Reflecting on the arrival of Buddhism to our island. Have a blessed Poson.";
-      if (lowerName.includes('good friday')) return "A day of reflection and peace.";
-      if (lowerName.includes('deepawali')) return "May the festival of lights bring joy and prosperity to your life.";
-      if (lowerName.includes('ramazan') || lowerName.includes('fitr')) return "Eid Mubarak! Wishing you joy and blessings.";
+      // --- 2026 Specific Holiday Messages ---
+      if (n.includes('duruthu')) return "Celebrating the first visit of Lord Buddha to Sri Lanka. May you find peace.";
+      if (n.includes('thai pongal')) return "Surya Pongal! Wishing you prosperity, abundance, and a bountiful harvest.";
+      if (n.includes('navam')) return "Commemorating the appointment of the two chief disciples, Sariputta and Moggallana.";
+      if (n.includes('independence')) return "Proudly celebrating the 78th Independence Day of our motherland. Freedom and Unity!";
+      if (n.includes('mahasivarathri')) return "Har Har Mahadev. May the blessings of Lord Shiva bring peace and prosperity.";
+      if (n.includes('medin')) return "Remembering the Buddha's visit to his father's kingdom. A day for family and reflection.";
+      if (n.includes('ramazan') || n.includes('ul-fitre')) return "Eid Mubarak! May Allah accept your fasting and prayers.";
+      if (n.includes('bak')) return "Commemorating the Buddha's second visit to Nagadipa. May you find serenity.";
+      if (n.includes('good friday')) return "A solemn day of reflection on the sacrifice of Jesus Christ.";
+      if (n.includes('sinhala') && n.includes('new year')) return "Suba Aluth Avuruddsak Wewa! Wishing you a prosperous New Year filled with milk and rice!";
+      if (n.includes('may day')) return "Saluting the hardworking people of Sri Lanka. Happy International Workers' Day.";
+      if (n.includes('vesak')) return "Buddhu Saranai! Celebrating the Birth, Enlightenment, and Parinirvana of the Buddha.";
+      if (n.includes('hadji') || n.includes('ul-allah')) return "Eid Al-Adha Mubarak! Wishing you joy and the blessings of sacrifice.";
+      if (n.includes('poson')) return "Celebrating the arrival of Arahat Mahinda and the gift of Buddhism to Sri Lanka.";
+      if (n.includes('esala')) return "Commemorating the first sermon of the Buddha. May the Dhamma guide you.";
+      if (n.includes('milad-un-nabi')) return "Celebrating the birth of the Holy Prophet. Peace and blessings be upon you.";
+      if (n.includes('nikini')) return "Reflecting on the first Dhamma Council. May your mind be clear and peaceful.";
+      if (n.includes('binara')) return "Commemorating the establishment of the Bhikkhuni Order. A day of equality and spiritual growth.";
+      if (n.includes('vap')) return "Celebrating the end of the rainy retreat (Vassana). May you be blessed with merit.";
+      if (n.includes('deepawali')) return "Happy Deepawali! May the light of a thousand lamps banish all darkness from your life.";
+      if (n.includes('ill')) return "Commemorating the dispatching of the first 60 disciples to spread the Dhamma.";
+      if (n.includes('unduwap')) return "Celebrating the arrival of Sanghamitta Theri with the Bo Sapling. A blessed Poya.";
+      if (n.includes('christmas')) return "Merry Christmas! Wishing you love, joy, and peace this festive season.";
 
-      // Category Messages
-      if (type === 'poya') return "May this Poya day bring you spiritual peace and mindfulness.";
+      // Categories as fallback
+      if (type === 'poya') return "May the blessings of the Triple Gem be with you on this Poya Day.";
+      if (type === 'merc') return "A Mercantile Holiday. Enjoy your well-deserved break!";
 
-      // Default
-      return "Enjoy your well-deserved break with friends and family!";
+      return "Have a wonderful holiday with your loved ones!";
     }
 
     function openHolidayModal(dateStr, items) {
