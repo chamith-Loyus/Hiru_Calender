@@ -32,7 +32,6 @@ jobs:
           PROVISIONING_BASE64: ${{ secrets.PROVISIONING_PROFILE }}
           TEAM_ID: "6LQK8G38G5"
         run: |
-          set -x
           cd ios_wrapper
           mkdir -p ios/certs
           
@@ -40,14 +39,8 @@ jobs:
           printf '%s' "$P12_BASE64" | base64 -D -o ios/certs/certificate.p12
           printf '%s' "$PROVISIONING_BASE64" | base64 -D -o ios/certs/profile.mobileprovision
           
-          # Extract UUID using macOS native tools (robust)
+          # Extract UUID using macOS native tools
           UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< $(security cms -D -i ios/certs/profile.mobileprovision))
-          echo "Parsed UUID: $UUID"
-          
-          if [ -z "$UUID" ]; then
-            echo "ERROR: Could not extract UUID from provisioning profile!"
-            exit 1
-          fi
           
           # Install Provisioning Profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
@@ -68,8 +61,7 @@ jobs:
           flutter build ipa --release \
             --export-options-plist=ios/ExportOptions.plist \
             --build-name=1.0.0 --build-number=1
-
-          
+      
       - name: Upload to TestFlight
         if: github.repository == 'chamith-Loyus/Hiru_Calender'
         env:
@@ -79,31 +71,22 @@ jobs:
         run: |
           cd ios_wrapper
           
-          # Trim and validate credential lengths to catch hidden characters
+          # Trim credentials
           CLEAN_KEY_ID=$(echo "$KEY_ID" | xargs)
           CLEAN_ISSUER_ID=$(echo "$ISSUER_ID" | xargs)
           
-          echo "Credential Validation:"
-          echo "Key ID Length: ${#CLEAN_KEY_ID} (Should be 10)"
-          echo "Issuer ID Length: ${#CLEAN_ISSUER_ID} (Should be 36)"
-          
+          # Create standard key search directory
           mkdir -p ~/private_keys
-          # Ensure clean writing of the key
+          
+          # Write the key
           printf "%s\n" "$KEY_CONTENT" > ~/private_keys/AuthKey_$CLEAN_KEY_ID.p8
           
-          echo "Step 1: Testing Connection (altool)..."
-          xcrun altool --list-providers \
-            --apiKey "$CLEAN_KEY_ID" \
-            --apiIssuer "$CLEAN_ISSUER_ID" || echo "altool check failed, continuing to check app-store-connect tool..."
-          
-          echo "Step 2: Uploading IPA..."
-          # We use the most reliable path for the IPA
+          # Upload via xcrun altool
           IPA_FILE=$(find build/ios/ipa -name "*.ipa" | head -n 1)
-          
           xcrun altool --upload-app --type ios \
             --file "$IPA_FILE" \
             --apiKey "$CLEAN_KEY_ID" \
-            --apiIssuer "$CLEAN_ISSUER_ID" --verbose
+            --apiIssuer "$CLEAN_ISSUER_ID"
             
       - name: Compress Simulator Build
         run: |
