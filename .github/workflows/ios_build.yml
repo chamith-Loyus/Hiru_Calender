@@ -58,11 +58,15 @@ jobs:
           security import ios/certs/certificate.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "buildpass" build.keychain
           
+          # Find the exact Identity Common Name
+          IDENTITY=$(security find-identity -v -p codesigning build.keychain | grep "Apple Distribution" | head -n 1 | awk -F '"' '{print $2}')
+          echo "Found Identity: $IDENTITY"
+          
           # Build signed IPA with explicit signing flags and verbose logging
           flutter build ipa --release \
             --export-options-plist=ios/ExportOptions.plist \
             --build-name=1.0.0 --build-number=1 \
-            --code-sign-identity="Apple Distribution" \
+            --code-sign-identity="$IDENTITY" \
             --provisioning-profile-specifier="Hiru Calendar 2026 App Store" \
             --verbose
 

@@ -6,6 +6,8 @@
 	<string>app-store</string>
 	<key>teamID</key>
 	<string>6LQK8G38G5</string>
+	<key>signingStyle</key>
+	<string>manual</string>
 	<key>provisioningProfiles</key>
 	<dict>
 		<key>com.hiru.calendar</key>
