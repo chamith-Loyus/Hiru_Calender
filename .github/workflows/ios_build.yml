@@ -34,11 +34,11 @@ jobs:
           cd ios_wrapper
           mkdir -p ios/certs
           
-          # Use base64 -D or openssl to ensure correct decoding on macOS
-          echo "$P12_BASE64" | base64 -D -o ios/certs/certificate.p12
-          echo "$PROVISIONING_BASE64" | base64 -D -o ios/certs/profile.mobileprovision
+          # More robust decoding using printf to avoid trailing newline issues
+          printf '%s' "$P12_BASE64" | base64 -D -o ios/certs/certificate.p12
+          printf '%s' "$PROVISIONING_BASE64" | base64 -D -o ios/certs/profile.mobileprovision
           
-          # Verify file sizes (Diagnostic)
+          # Verify file sizes
           ls -lh ios/certs/
           
           # Install Provisioning Profile
@@ -52,7 +52,6 @@ jobs:
           security unlock-keychain -p "buildpass" build.keychain
           
           # Import the certificate
-          # Using -P (capital P) for the password
           security import ios/certs/certificate.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "buildpass" build.keychain
           
