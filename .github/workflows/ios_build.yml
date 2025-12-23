@@ -79,32 +79,33 @@ jobs:
         run: |
           cd ios_wrapper
           
-          # Trim potential whitespace from secrets
+          # Trim potential whitespace from secrets for robustness
           CLEAN_KEY_ID=$(echo "$KEY_ID" | xargs)
           CLEAN_ISSUER_ID=$(echo "$ISSUER_ID" | xargs)
           
-          # Create the private_keys folder (standard locations)
+          # Create standard key search directory
           mkdir -p ~/private_keys
-          mkdir -p ~/.appstoreconnect/private_keys
           
-          # Write the key
-          printf '%s' "$KEY_CONTENT" > ~/private_keys/AuthKey_$CLEAN_KEY_ID.p8
-          cp ~/private_keys/AuthKey_$CLEAN_KEY_ID.p8 ~/.appstoreconnect/private_keys/AuthKey_$CLEAN_KEY_ID.p8
+          # IMPORTANT: Use echo to ensure the key ends with a proper newline, which altool often needs
+          echo "$KEY_CONTENT" > ~/private_keys/AuthKey_$CLEAN_KEY_ID.p8
           
-          echo "Checking API Key file..."
+          echo "Diagnostic: Verifying Key File..."
           ls -l ~/private_keys/AuthKey_$CLEAN_KEY_ID.p8
           
-          echo "Verifying App Store Connect Credentials..."
-          # List providers with verbose output
+          echo "Step 1: Verifying Authentication with Apple..."
+          # List providers to verify the key works
           xcrun altool --list-providers \
             --apiKey "$CLEAN_KEY_ID" \
             --apiIssuer "$CLEAN_ISSUER_ID" \
             --verbose
           
-          echo "Validating and Uploading App..."
-          # Upload via xcrun altool
+          echo "Step 2: Uploading IPA to TestFlight..."
+          # Find the IPA file dynamically
+          IPA_PATH=$(ls build/ios/ipa/*.ipa | head -n 1)
+          echo "Uploading $IPA_PATH"
+          
           xcrun altool --upload-app --type ios \
-            --file build/ios/ipa/*.ipa \
+            --file "$IPA_PATH" \
             --apiKey "$CLEAN_KEY_ID" \
             --apiIssuer "$CLEAN_ISSUER_ID" \
             --verbose
