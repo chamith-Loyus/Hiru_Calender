@@ -288,12 +288,15 @@
 
     @media (max-width: 576px) {
       .logo-app {
-        height: 50px;
-        width: 50px;
+        height: 100px;
+        /* Keep it large on mobile */
+        width: 100px;
+        border-radius: 15px;
       }
 
       .logo-hiru {
-        height: 40px;
+        height: 70px;
+        /* Keep it large on mobile */
       }
 
       .cal-header {
@@ -399,6 +402,7 @@
       <div class="cal-header">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
           <div class="logo-container">
+            <img class="logo-app" src="icons/logo.png" alt="App Logo">
             <img class="logo-hiru" src="https://www.hirutv.lk/assets/images/logo.png" alt="Hiru TV">
           </div>
           <div class="text-end">
