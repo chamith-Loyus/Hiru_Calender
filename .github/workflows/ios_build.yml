@@ -40,47 +40,36 @@ jobs:
           printf '%s' "$P12_BASE64" | base64 -D -o ios/certs/certificate.p12
           printf '%s' "$PROVISIONING_BASE64" | base64 -D -o ios/certs/profile.mobileprovision
           
-          # Extract UUID from Provisioning Profile
-          UUID=$(grep -aA1 "UUID" ios/certs/profile.mobileprovision | grep -o "[-A-Z0-9]\{36\}")
-          echo "Profile UUID: $UUID"
+          # Extract UUID using macOS native tools (robust)
+          UUID=$(/usr/libexec/PlistBuddy -c "Print UUID" /dev/stdin <<< $(security cms -D -i ios/certs/profile.mobileprovision))
+          echo "Parsed UUID: $UUID"
           
-          # Install Provisioning Profile using its UUID
+          if [ -z "$UUID" ]; then
+            echo "ERROR: Could not extract UUID from provisioning profile!"
+            exit 1
+          fi
+          
+          # Install Provisioning Profile
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
           cp ios/certs/profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.mobileprovision
           
-          # Create and setup temporary keychain
+          # Keychain setup
           security create-keychain -p "buildpass" build.keychain
           security list-keychains -d user -s build.keychain $(security list-keychains -d user | xargs)
           security default-keychain -s build.keychain
           security unlock-keychain -p "buildpass" build.keychain
           security set-keychain-settings -lut 21600 build.keychain
           
-          # Import certificate
+          # Import
           security import ios/certs/certificate.p12 -k build.keychain -P "$P12_PASSWORD" -A
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "buildpass" build.keychain
-          
-          # Find the exact Identity Common Name
-          echo "Listing all identities in keychain:"
-          security find-identity -v -p codesigning build.keychain
-          
-          echo "Checking Certificates:"
-          security find-certificate -a build.keychain
-          
-          IDENTITY=$(security find-identity -v -p codesigning build.keychain | grep "Apple Distribution" | head -n 1 | awk -F '"' '{print $2}')
-          echo "Current Identity Variable: $IDENTITY"
-          
-          if [ -z "$IDENTITY" ]; then
-            echo "ERROR: No Apple Distribution identity found in keychain!"
-            exit 1
-          fi
           
           # Build signed IPA
           flutter build ipa --release \
             --export-options-plist=ios/ExportOptions.plist \
             --build-name=1.0.0 --build-number=1 \
-            --code-sign-identity="$IDENTITY" \
-            --provisioning-profile-specifier="Hiru Calendar 2026 App Store" \
-            --verbose
+            --code-sign-identity="Apple Distribution" \
+            --provisioning-profile-specifier="Hiru Calendar 2026 App Store"
 
           
       - name: Upload to TestFlight
