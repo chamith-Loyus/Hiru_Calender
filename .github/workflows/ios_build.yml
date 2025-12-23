@@ -30,33 +30,39 @@ jobs:
           P12_BASE64: ${{ secrets.P12_CERTIFICATE }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
           PROVISIONING_BASE64: ${{ secrets.PROVISIONING_PROFILE }}
+          TEAM_ID: "6LQK8G38G5"
         run: |
           cd ios_wrapper
           mkdir -p ios/certs
           
-          # More robust decoding using printf to avoid trailing newline issues
+          # Decode certificates
           printf '%s' "$P12_BASE64" | base64 -D -o ios/certs/certificate.p12
           printf '%s' "$PROVISIONING_BASE64" | base64 -D -o ios/certs/profile.mobileprovision
           
-          # Verify file sizes
-          ls -lh ios/certs/
+          # Extract UUID from Provisioning Profile
+          UUID=$(grep -aA1 "UUID" ios/certs/profile.mobileprovision | grep -o "[-A-Z0-9]\{36\}")
+          echo "Profile UUID: $UUID"
           
-          # Install Provisioning Profile
+          # Install Provisioning Profile using its UUID
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          cp ios/certs/profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+          cp ios/certs/profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.mobileprovision
           
-          # Create temporary keychain for signing
+          # Create and setup temporary keychain
           security create-keychain -p "buildpass" build.keychain
-          security list-keychains -s build.keychain
+          security list-keychains -d user -s build.keychain $(security list-keychains -d user | xargs)
           security default-keychain -s build.keychain
           security unlock-keychain -p "buildpass" build.keychain
+          security set-keychain-settings -lut 21600 build.keychain
           
-          # Import the certificate
+          # Import certificate
           security import ios/certs/certificate.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "buildpass" build.keychain
           
-          # Build signed IPA
-          flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+          # Build signed IPA with explicit signing flags
+          flutter build ipa --release \
+            --export-options-plist=ios/ExportOptions.plist \
+            --build-name=1.0.0 --build-number=1
+
           
       - name: Upload to TestFlight
         if: github.repository == 'chamith-Loyus/Hiru_Calender'
