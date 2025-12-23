@@ -78,34 +78,36 @@ jobs:
           KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_KEY_CONTENT }}
         run: |
           cd ios_wrapper
-          # Create the private_keys folder in home directory (standard locations)
+          
+          # Trim potential whitespace from secrets
+          CLEAN_KEY_ID=$(echo "$KEY_ID" | xargs)
+          CLEAN_ISSUER_ID=$(echo "$ISSUER_ID" | xargs)
+          
+          # Create the private_keys folder (standard locations)
           mkdir -p ~/private_keys
-          mkdir -p ~/.private_keys
           mkdir -p ~/.appstoreconnect/private_keys
           
-          # Write the key using printf for exact formatting
-          printf '%s' "$KEY_CONTENT" > ~/private_keys/AuthKey_$KEY_ID.p8
-          cp ~/private_keys/AuthKey_$KEY_ID.p8 ~/.private_keys/AuthKey_$KEY_ID.p8
-          cp ~/private_keys/AuthKey_$KEY_ID.p8 ~/.appstoreconnect/private_keys/AuthKey_$KEY_ID.p8
+          # Write the key
+          printf '%s' "$KEY_CONTENT" > ~/private_keys/AuthKey_$CLEAN_KEY_ID.p8
+          cp ~/private_keys/AuthKey_$CLEAN_KEY_ID.p8 ~/.appstoreconnect/private_keys/AuthKey_$CLEAN_KEY_ID.p8
           
-          # Secure the key file
-          chmod 600 ~/private_keys/AuthKey_$KEY_ID.p8
+          echo "Checking API Key file..."
+          ls -l ~/private_keys/AuthKey_$CLEAN_KEY_ID.p8
           
           echo "Verifying App Store Connect Credentials..."
-          # List providers to verify authentication
-          xcrun altool --list-providers --apiKey "$KEY_ID" --apiIssuer "$ISSUER_ID"
+          # List providers with verbose output
+          xcrun altool --list-providers \
+            --apiKey "$CLEAN_KEY_ID" \
+            --apiIssuer "$CLEAN_ISSUER_ID" \
+            --verbose
           
-          echo "Validating App..."
-          # Validate app before upload
-          xcrun altool --validate-app --type ios \
-            --file build/ios/ipa/*.ipa \
-            --apiKey "$KEY_ID" --apiIssuer "$ISSUER_ID"
-            
-          echo "Uploading App to TestFlight..."
+          echo "Validating and Uploading App..."
           # Upload via xcrun altool
           xcrun altool --upload-app --type ios \
             --file build/ios/ipa/*.ipa \
-            --apiKey "$KEY_ID" --apiIssuer "$ISSUER_ID"
+            --apiKey "$CLEAN_KEY_ID" \
+            --apiIssuer "$CLEAN_ISSUER_ID" \
+            --verbose
             
       - name: Compress Simulator Build
         run: |
