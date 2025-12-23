@@ -78,11 +78,12 @@ jobs:
           KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_KEY_CONTENT }}
         run: |
           cd ios_wrapper
-          # Create the .p8 file for xcrun
-          mkdir -p ~/.appstoreconnect/private_keys
-          echo "$KEY_CONTENT" > ~/.appstoreconnect/private_keys/AuthKey_$KEY_ID.p8
+          # Create the private_keys folder in home directory (standard for altool)
+          mkdir -p ~/private_keys
+          printf '%s' "$KEY_CONTENT" > ~/private_keys/AuthKey_$KEY_ID.p8
           
-          # Upload via xcrun altool or xcrun app-store-connect
+          # Upload via xcrun altool
+          # Note: altool looks for the key in ~/private_keys by default when using --apiKey
           xcrun altool --upload-app --type ios \
             --file build/ios/ipa/*.ipa \
             --apiKey "$KEY_ID" --apiIssuer "$ISSUER_ID"
