@@ -24,7 +24,13 @@ jobs:
           cd ios_wrapper
           flutter build ios --simulator --no-codesign
           
-      - name: Compress Build
+      - name: Build iOS (Production)
+        if: github.repository == 'chamith-Loyus/Hiru_Calender'
+        run: |
+          cd ios_wrapper
+          flutter build ios --release --no-codesign
+          
+      - name: Compress Simulator Build
         run: |
           cd ios_wrapper/build/ios/iphonesimulator
           zip -r HiruCalendar_Simulator.zip Runner.app
