@@ -67,9 +67,7 @@ jobs:
           # Build signed IPA
           flutter build ipa --release \
             --export-options-plist=ios/ExportOptions.plist \
-            --build-name=1.0.0 --build-number=1 \
-            --code-sign-identity="Apple Distribution" \
-            --provisioning-profile-specifier="Hiru Calendar 2026 App Store"
+            --build-name=1.0.0 --build-number=1
 
           
       - name: Upload to TestFlight
