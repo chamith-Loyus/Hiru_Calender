@@ -26,29 +26,48 @@ jobs:
           
       - name: Build iOS (Production)
         if: github.repository == 'chamith-Loyus/Hiru_Calender'
-        run: |
-          cd ios_wrapper
-          flutter build ios --release --no-codesign
-          
-      - name: Upload to TestFlight
-        if: github.repository == 'chamith-Loyus/Hiru_Calender'
         env:
           P12_BASE64: ${{ secrets.P12_CERTIFICATE }}
           P12_PASSWORD: ${{ secrets.P12_PASSWORD }}
           PROVISIONING_BASE64: ${{ secrets.PROVISIONING_PROFILE }}
-          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
-          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-          KEY_CONTENT_BASE64: ${{ secrets.APP_STORE_CONNECT_KEY_CONTENT }}
         run: |
           cd ios_wrapper
-          # Setup Certificates
-          echo $P12_BASE64 | base64 --decode > ios/certificate.p12
-          echo $PROVISIONING_BASE64 | base64 --decode > ios/profile.mobileprovision
+          mkdir -p ios/certs
+          echo $P12_BASE64 | base64 --decode > ios/certs/certificate.p12
+          echo $PROVISIONING_BASE64 | base64 --decode > ios/certs/profile.mobileprovision
           
-          # Use xcodebuild to package and upload
-          # Note: Real production upload usually requires a macos runner with XC-CLI
-          # We will use 'ipa' tool or fastlane if available, but for now we provide the artifact
+          # Install Provisioning Profile
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          cp ios/certs/profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
           
+          # Create temporary keychain for signing
+          security create-keychain -p "" build.keychain
+          security list-keychains -s build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p "" build.keychain
+          security import ios/certs/certificate.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "" build.keychain
+          
+          # Build signed IPA
+          flutter build ipa --release --export-options-plist=ios/ExportOptions.plist
+          
+      - name: Upload to TestFlight
+        if: github.repository == 'chamith-Loyus/Hiru_Calender'
+        env:
+          KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          KEY_CONTENT: ${{ secrets.APP_STORE_CONNECT_KEY_CONTENT }}
+        run: |
+          cd ios_wrapper
+          # Create the .p8 file for xcrun
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$KEY_CONTENT" > ~/.appstoreconnect/private_keys/AuthKey_$KEY_ID.p8
+          
+          # Upload via xcrun altool or xcrun app-store-connect
+          xcrun altool --upload-app --type ios \
+            --file build/ios/ipa/*.ipa \
+            --apiKey "$KEY_ID" --apiIssuer "$ISSUER_ID"
+            
       - name: Compress Simulator Build
         run: |
           cd ios_wrapper/build/ios/iphonesimulator
@@ -60,4 +79,4 @@ jobs:
           name: hiru-calendar-builds
           path: |
             ios_wrapper/build/ios/iphonesimulator/HiruCalendar_Simulator.zip
-            ios_wrapper/build/ios/iphoneos/Runner.app
+            ios_wrapper/build/ios/ipa/*.ipa
