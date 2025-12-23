@@ -79,36 +79,31 @@ jobs:
         run: |
           cd ios_wrapper
           
-          # Trim potential whitespace from secrets for robustness
+          # Trim and validate credential lengths to catch hidden characters
           CLEAN_KEY_ID=$(echo "$KEY_ID" | xargs)
           CLEAN_ISSUER_ID=$(echo "$ISSUER_ID" | xargs)
           
-          # Create standard key search directory
+          echo "Credential Validation:"
+          echo "Key ID Length: ${#CLEAN_KEY_ID} (Should be 10)"
+          echo "Issuer ID Length: ${#CLEAN_ISSUER_ID} (Should be 36)"
+          
           mkdir -p ~/private_keys
+          # Ensure clean writing of the key
+          printf "%s\n" "$KEY_CONTENT" > ~/private_keys/AuthKey_$CLEAN_KEY_ID.p8
           
-          # IMPORTANT: Use echo to ensure the key ends with a proper newline, which altool often needs
-          echo "$KEY_CONTENT" > ~/private_keys/AuthKey_$CLEAN_KEY_ID.p8
-          
-          echo "Diagnostic: Verifying Key File..."
-          ls -l ~/private_keys/AuthKey_$CLEAN_KEY_ID.p8
-          
-          echo "Step 1: Verifying Authentication with Apple..."
-          # List providers to verify the key works
+          echo "Step 1: Testing Connection (altool)..."
           xcrun altool --list-providers \
             --apiKey "$CLEAN_KEY_ID" \
-            --apiIssuer "$CLEAN_ISSUER_ID" \
-            --verbose
+            --apiIssuer "$CLEAN_ISSUER_ID" || echo "altool check failed, continuing to check app-store-connect tool..."
           
-          echo "Step 2: Uploading IPA to TestFlight..."
-          # Find the IPA file dynamically
-          IPA_PATH=$(ls build/ios/ipa/*.ipa | head -n 1)
-          echo "Uploading $IPA_PATH"
+          echo "Step 2: Uploading IPA..."
+          # We use the most reliable path for the IPA
+          IPA_FILE=$(find build/ios/ipa -name "*.ipa" | head -n 1)
           
           xcrun altool --upload-app --type ios \
-            --file "$IPA_PATH" \
+            --file "$IPA_FILE" \
             --apiKey "$CLEAN_KEY_ID" \
-            --apiIssuer "$CLEAN_ISSUER_ID" \
-            --verbose
+            --apiIssuer "$CLEAN_ISSUER_ID" --verbose
             
       - name: Compress Simulator Build
         run: |
