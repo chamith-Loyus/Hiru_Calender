@@ -489,6 +489,18 @@
       border: 2px solid var(--hiru-orange);
     }
 
+    /* Slogan Style */
+    .hiru-slogan {
+      font-weight: 900;
+      font-size: 1.1rem;
+      background: linear-gradient(to right, #FFD700, #FF8C00);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
     /* Next Holiday Widget */
     .next-holiday-banner {
       background: rgba(255, 255, 255, 0.85);
@@ -575,7 +587,7 @@
         <button class="btn" id="prevBtn" disabled>◀</button>
         <button class="btn" id="nextBtn">▶</button>
       </div>
-      <button class="btn btn-download" id="downloadBtn">Download Full Year PDF</button>
+      <div class="hiru-slogan">Sri Lanka's Number 01 Channel</div>
     </div>
   </div>
 
@@ -950,46 +962,6 @@
       if (currentMonth < 11) { currentMonth++; renderMonth(2026, currentMonth); }
     });
 
-    document.getElementById("downloadBtn").addEventListener("click", async () => {
-      const { jsPDF } = window.jspdf;
-      let pdf = null;
-      const area = document.getElementById("captureArea");
-      document.body.classList.add("pdf-mode");
-
-      for (let month = 0; month < 12; month++) {
-        currentMonth = month;
-        renderMonth(2026, month);
-        await new Promise(r => setTimeout(r, 400));
-
-        const canvas = await html2canvas(area, {
-          scale: 2,
-          useCORS: true,
-          backgroundColor: "#ffffff",
-          logging: false
-        });
-
-        const imgData = canvas.toDataURL("image/png");
-        const pxToMm = px => px * 0.264583;
-        const pdfWidth = pxToMm(canvas.width);
-        const pdfHeight = pxToMm(canvas.height);
-
-        if (!pdf) {
-          pdf = new jsPDF({
-            orientation: pdfWidth > pdfHeight ? "l" : "p",
-            unit: "mm",
-            format: [pdfWidth, pdfHeight]
-          });
-        } else {
-          pdf.addPage([pdfWidth, pdfHeight]);
-        }
-        pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-      }
-
-      document.body.classList.remove("pdf-mode");
-      currentMonth = 0;
-      renderMonth(2026, 0);
-      pdf.save("Hiru_TV_Calendar_2026.pdf");
-    });
 
     // Install Prompt Logic
     let deferredPrompt;
