@@ -485,20 +485,44 @@
       border: 2px solid var(--hiru-orange);
     }
 
-    /* Hiru Button Style (Static Slogan) */
+    /* Hiru Button Style (Premium Static Slogan) */
     .btn-hiru {
-      font-weight: 700;
-      font-size: 0.85rem;
-      background: linear-gradient(135deg, #FFD700, #FF8C00);
+      font-weight: 900;
+      font-size: 0.9rem;
+      background: linear-gradient(135deg, #FFD700 0%, #FF8C00 50%, #FFD700 100%);
+      background-size: 200% auto;
       color: #fff !important;
-      border: none;
-      padding: 10px 24px;
-      border-radius: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      padding: 12px 28px;
+      border-radius: 50px;
       text-decoration: none;
       display: inline-block;
-      box-shadow: 0 4px 10px rgba(215, 143, 38, 0.2);
+      box-shadow: 0 10px 25px rgba(215, 143, 38, 0.4);
       cursor: default;
       white-space: nowrap;
+      animation: shine 4s linear infinite, float 3s ease-in-out infinite;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      letter-spacing: 0.5px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @keyframes shine {
+      to {
+        background-position: 200% center;
+      }
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-5px);
+      }
     }
 
 
@@ -588,7 +612,7 @@
         <button class="btn" id="prevBtn" disabled>◀</button>
         <button class="btn" id="nextBtn">▶</button>
       </div>
-      <div class="btn-hiru">Hiru TV Sri Lanka's Number 1 Channel</div>
+      <div class="btn-hiru">✨ Hiru TV Sri Lanka's Number 1 Channel ✨</div>
     </div>
   </div>
 
