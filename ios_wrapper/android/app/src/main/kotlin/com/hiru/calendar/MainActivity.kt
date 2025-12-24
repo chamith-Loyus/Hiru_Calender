@@ -1,4 +1,4 @@
-package com.example.ios_wrapper
+package com.hiru.calendar
 
 import io.flutter.embedding.android.FlutterActivity
 
