@@ -915,32 +915,21 @@
     // Next Holiday Widget Logic
     function updateNextHoliday() {
       const today = new Date();
-      // Logic: Find the first holiday in the list equal to or after today
-      // Since we only have 2026 data:
-      let compareDate = today;
-      const currentYear = today.getFullYear();
-
-      // If we are in 2025, look for first holiday of 2026
-      if (currentYear < 2026) {
-        compareDate = new Date("2026-01-01");
-      }
+      const todayMidnight = new Date(today.getFullYear(), today.getMonth(), today.getDate());
 
       const sortedDates = Object.keys(holidays2026).sort();
       let nextHol = null;
       let daysAway = 0;
 
       for (let dStr of sortedDates) {
-        // Create date object at midnight for fair comparison
-        const hDate = new Date(dStr);
-        // Reset time part of dates for accurate day diff
-        const hDateMidnight = new Date(hDate.setHours(0, 0, 0, 0));
-        const todayMidnight = new Date(compareDate.setHours(0, 0, 0, 0));
+        const parts = dStr.split('-');
+        // Use year, month (0-indexed), and day from key
+        const hDateMidnight = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
 
         if (hDateMidnight >= todayMidnight) {
-          nextHol = { date: hDate, info: holidays2026[dStr] };
-
+          nextHol = { date: hDateMidnight, info: holidays2026[dStr] };
           const diffTime = hDateMidnight - todayMidnight;
-          daysAway = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+          daysAway = Math.round(diffTime / (1000 * 60 * 60 * 24));
           break;
         }
       }
