@@ -489,16 +489,25 @@
       border: 2px solid var(--hiru-orange);
     }
 
-    /* Slogan Style */
-    .hiru-slogan {
-      font-weight: 900;
-      font-size: 1.1rem;
-      background: linear-gradient(to right, #FFD700, #FF8C00);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    /* Hiru Button Style */
+    .btn-hiru {
+      font-weight: 700;
+      font-size: 0.9rem;
+      background: linear-gradient(135deg, #FFD700, #FF8C00);
+      color: #fff !important;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 20px;
+      text-decoration: none;
+      display: inline-block;
+      box-shadow: 0 4px 10px rgba(215, 143, 38, 0.3);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn-hiru:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(215, 143, 38, 0.4);
+      background: linear-gradient(135deg, #FFC107, #FF6F00);
     }
 
     /* Next Holiday Widget */
@@ -587,7 +596,7 @@
         <button class="btn" id="prevBtn" disabled>◀</button>
         <button class="btn" id="nextBtn">▶</button>
       </div>
-      <div class="hiru-slogan">Sri Lanka's Number 01 Channel</div>
+      <a href="https://www.hirutv.lk/" target="_blank" class="btn-hiru">Visit Hiru TV</a>
     </div>
   </div>
 
