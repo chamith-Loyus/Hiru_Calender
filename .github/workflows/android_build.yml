@@ -1,0 +1,48 @@
+name: Build Android (Production)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.10.x'
+          channel: 'stable'
+
+      - name: Create Key Properties
+        run: |
+          echo "storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" > ios_wrapper/android/key.properties
+          echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> ios_wrapper/android/key.properties
+          echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> ios_wrapper/android/key.properties
+          echo "storeFile=upload-keystore.jks" >> ios_wrapper/android/key.properties
+
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > ios_wrapper/android/app/upload-keystore.jks
+
+      - name: Get Dependencies
+        working-directory: ./ios_wrapper
+        run: flutter pub get
+
+      - name: Build App Bundle
+        working-directory: ./ios_wrapper
+        run: flutter build appbundle --release
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-bundle
+          path: ios_wrapper/build/app/outputs/bundle/release/app-release.aab
