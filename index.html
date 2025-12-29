@@ -631,7 +631,67 @@
   </div>
 
 
+  <!-- PWA Install Modal (Android Only) -->
+  <div class="modal-overlay" id="pwaInstallModal">
+    <div class="modal-card">
+      <div class="modal-header-img">
+        <img src="icons/logo.png" width="80" height="80" style="filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));">
+        <div class="modal-date-badge" style="border-radius: 12px; font-size: 0.9rem;">Install App</div>
+      </div>
+      <div class="modal-body">
+        <div class="modal-title">Hiru Calendar 2026</div>
+        <p style="color:#666; font-size:0.9rem; line-height:1.5; margin-bottom:25px">
+          Install Hiru Calendar on your home screen for fast, easy access anytime!
+        </p>
+        <div class="d-flex gap-3">
+          <button class="modal-close-btn" id="closeInstallBtn"
+            style="background:#eee; color:#666; box-shadow:none;">Later</button>
+          <button class="modal-close-btn" id="promoInstallBtn">Install Now</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // PWA Install Prompt Logic (Android Only)
+    let deferredPrompt;
+    const pwaModal = document.getElementById('pwaInstallModal');
+    const promoInstallBtn = document.getElementById('promoInstallBtn');
+    const closeInstallBtn = document.getElementById('closeInstallBtn');
+
+    // Check if device is Android
+    const isAndroid = /android/i.test(navigator.userAgent || navigator.vendor || window.opera);
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+
+      // Only show the modal if it's Android
+      if (isAndroid) {
+        pwaModal.classList.add('active');
+      }
+    });
+
+    promoInstallBtn.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      pwaModal.classList.remove('active');
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      console.log(`User response to the install prompt: ${outcome}`);
+      deferredPrompt = null;
+    });
+
+    closeInstallBtn.addEventListener('click', () => {
+      pwaModal.classList.remove('active');
+    });
+
+    // Close on background click
+    pwaModal.addEventListener('click', (e) => {
+      if (e.target === pwaModal) {
+        pwaModal.classList.remove('active');
+      }
+    });
+
     // PWA Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
